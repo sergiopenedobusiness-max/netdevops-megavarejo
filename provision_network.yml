@@ -1,0 +1,26 @@
+---
+# Playbook NetDevOps: Provisionamento Declarativo
+- name: Orquestrar VLANs e Interfaces em Switches
+  hosts: switches_acesso
+  gather_facts: false
+  connection: network_cli
+
+  tasks:
+    - name: Garantir conformidade das VLANs corporativas
+      cisco.ios.ios_vlans:
+        config:
+          - vlan_id: 10
+            name: CI_CD_Pipeline
+            state: active
+          - vlan_id: 30
+            name: Producao_BD
+            state: active
+        state: merged  # Idempotência declarativa: não altera se já existir
+
+    - name: Configurar interface de acesso segura
+      cisco.ios.ios_l2_interfaces:
+        config:
+          - name: FastEthernet0/1
+            mode: access
+            access:
+              vlan: 10
